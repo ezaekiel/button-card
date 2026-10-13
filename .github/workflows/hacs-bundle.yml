@@ -1,0 +1,48 @@
+name: Build HACS bundle
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - button-card.js
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Yarn
+        run: npm install --global yarn@1.22.22
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build button-card
+        run: yarn rollup
+
+      - name: Publish the HACS bundle at the repository root
+        run: cp dist/button-card.js button-card.js
+
+      - name: Commit updated bundle
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add button-card.js
+          if git diff --cached --quiet; then
+            echo "HACS bundle is already up to date"
+            exit 0
+          fi
+          git commit -m "chore: update HACS bundle"
+          git push
