@@ -1,59 +1,76 @@
-# Button Card by [@RomRider](https://github.com/RomRider) <!-- omit in toc -->
+# Home Assistant Button Card — Theme-aware fork
 
-[![Stable][releases-shield]][releases] [![Beta][releases-dev-shield]][releases-dev] [![HACS Badge][hacs-badge]][hacs-link] ![Project Maintenance][maintenance-shield] <br/> ![Downloads][downloads] [![GitHub Activity][commits-shield]][commits] [![License][license-shield]](LICENSE.md) [![Discord][discord-shield]][discord] [![Community Forum][forum-shield]][forum]
+This repository is a HACS-compatible fork of [custom-cards/button-card](https://github.com/custom-cards/button-card), originally created by [RomRider](https://github.com/RomRider). It keeps the upstream card's features and adds theme-aware state colors for card backgrounds.
 
-[commits-shield]: https://img.shields.io/github/commit-activity/y/custom-cards/button-card.svg
-[commits]: https://github.com/custom-cards/button-card/commits/master
-[discord]: https://discord.gg/Qa5fW2R
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg
-[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg
-[forum]: https://community.home-assistant.io/t/lovelace-button-card/65981
-[license-shield]: https://img.shields.io/github/license/custom-cards/button-card.svg
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
-[releases-shield]: https://img.shields.io/github/release/custom-cards/button-card.svg
-[releases]: https://github.com/custom-cards/button-card/releases/latest
-[releases-dev-shield]: https://img.shields.io/github/package-json/v/custom-cards/button-card/dev?label=release%40dev
-[releases-dev]: https://github.com/custom-cards/button-card/releases
-[hacs-badge]: https://img.shields.io/badge/HACS-Default-41BDF5.svg
-[downloads]: https://img.shields.io/github/downloads/custom-cards/button-card/total
-[hacs-link]: https://hacs.xyz/
+This is an independent fork, not the upstream project. The fork-specific behavior described below applies to the code published in this repository.
 
-# Useful links
+## Fork-specific change: use Home Assistant theme state colors
 
-- [Stable version documentation](https://custom-cards.github.io/button-card/)
-- [Dev version documentation](https://custom-cards.github.io/button-card/dev/)
-- [HA Discord][discord]
-- [button-card forum thread][forum]
+For cards using the card color type, the automatic state background follows Home Assistant's theme state-color variables instead of using a light's RGB or color-temperature color for the card background. This makes active and inactive card backgrounds consistent with the selected HA theme.
 
-# What is `custom:button-card`?
+With the icon color type, the icon keeps the upstream light-color behavior, including RGB and color-temperature coloring where supported. Explicit colors configured in a card or its state rules continue to take precedence according to the card configuration.
 
-This is a lovelace custom card called button-card for your entities with a **LOT** of configuration options.
+See [Home Assistant theme state colors](https://www.home-assistant.io/integrations/frontend/#themes) and the [complete button-card documentation](https://custom-cards.github.io/button-card/).
 
-![all](examples/all.gif)
+## Requirements
 
-- works with any entity
-- 6 available actions on **tap** and/or **hold** and/or **double click**: `none`, `toggle`, `more-info`, `navigate`, `url`, `assist` and `call-service`
-- **icon tap action**: Separate action when clicking the icon specifically which takes precedence over main card actions.
-- **momentary actions** for the card and/or icon: `press_action` and `release_action` (if used, replaces default actions)
-- 3 button-card custom actions: `javascript`, `multi-actions`, `toast`
-- state display (optional)
-- custom color (optional), or based on light rgb value/temperature
-- custom state definition with customizable color, icon and style
-- custom size of the icon, width and height
-- aspect ratio support
-- Support for javascript templates
-- custom icon
-- custom css style
-- multiple layout support and custom layout support
-- units for sensors can be redefined or hidden
-- 2 color types
-  - `icon` : apply color settings to the icon only
-  - `card` : apply color settings to the card only
-- automatic font color if `color_type` is set to `card`
-- blank card and label card (for organization)
-- Native blink animation support
-- icon rotation animation support
-- confirmation popup for sensitive items or locking mecanism
-- password or PIN protection for actions
-- haptic support for the [IOS companion App](https://companion.home-assistant.io/docs/integrations/haptics)
-- support for [HACS](https://github.com/hacs/integration)
+- Home Assistant 2025.10.0 or newer.
+- HACS, for the recommended installation method.
+
+## Install with HACS (custom repository)
+
+This fork is not part of the HACS default repository list. Add it as a custom repository:
+
+1. In Home Assistant, open **HACS**.
+2. Open the **three-dot menu** and choose **Custom repositories**.
+3. Enter **ezaekiel/button-card** as the repository.
+4. Select **Dashboard** as the category, then add the repository.
+5. Find **Button Card** in HACS and download/install it.
+6. If HACS asks you to reload Home Assistant or refresh the browser, follow the prompt.
+
+The repository includes the built **button-card.js** file at its root and a **hacs.json** manifest for HACS. If you previously added the repository while it was missing the bundle, refresh HACS and try adding it again.
+
+### Avoid duplicate resources
+
+If the upstream button-card is already installed, do not load both copies as the same **custom:button-card** custom element. Replace the existing resource with this fork, or remove the old installation before adding this one. Keep only one active button-card JavaScript resource in the dashboard.
+
+HACS normally registers the resource automatically. If you need to add it manually, use this URL and resource type:
+
+- URL: **/hacsfiles/button-card/button-card.js**
+- Resource type: **JavaScript Module**
+
+## Manual installation
+
+1. Download **button-card.js** from the root of this repository's **master** branch.
+2. Copy it to your Home Assistant **www** directory (usually **/config/www/button-card.js**).
+3. In **Settings → Dashboards → Resources**, add:
+   - URL: **/local/button-card.js**
+   - Resource type: **JavaScript Module**
+4. Refresh the browser or the Home Assistant companion app.
+
+Do not install both the HACS copy and a manual copy at the same time.
+
+## Use in a dashboard
+
+The custom card type remains:
+
+~~~yaml
+type: custom:button-card
+entity: light.example
+name: Example light
+color_type: card
+~~~
+
+The fork-specific state background behavior applies when card color is selected. The component retains the upstream configuration options, templates, actions, layouts, and other features. See the [configuration guide](https://custom-cards.github.io/button-card/).
+
+## Build and published bundle
+
+The source code is in **src/**. A GitHub Actions workflow builds the distributable when changes are pushed to **master** and publishes the generated **button-card.js** file at the repository root for HACS. The checked-in root bundle is the file HACS installs; editing source files alone does not change the installed card until a new bundle is generated.
+
+## Upstream project and license
+
+- Upstream project: [custom-cards/button-card](https://github.com/custom-cards/button-card)
+- Upstream documentation: [button-card documentation](https://custom-cards.github.io/button-card/)
+- License: [MIT](LICENSE.md)
+
+Please use this repository's issues for fork-specific bugs. For behavior unchanged from upstream, consult the upstream documentation and community resources.
